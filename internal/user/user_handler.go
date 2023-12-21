@@ -9,6 +9,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+const (
+	TokenName = "Token"
+)
+
 type Handler struct {
 	Service
 }
@@ -64,9 +68,11 @@ func (h *Handler) Login(c *fiber.Ctx) error {
 	}
 
 	c.Cookie(&fiber.Cookie{
-		Name:    "AccessToken",
-		Value:   token,
-		Expires: time.Now().Add(time.Hour * 24),
+		Name:     TokenName,
+		Value:    token,
+		Expires:  time.Now().Add(time.Hour * 24),
+		MaxAge:   86400,
+		HTTPOnly: true,
 	})
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -76,10 +82,11 @@ func (h *Handler) Login(c *fiber.Ctx) error {
 
 func (h *Handler) Logout(c *fiber.Ctx) error {
 	c.Cookie(&fiber.Cookie{
-		Name:     "AcessToken",
+		Name:     TokenName,
 		Value:    "",
 		Expires:  time.Now().Add(-time.Hour * 24),
 		HTTPOnly: true,
+		MaxAge:   -1,
 	})
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -88,7 +95,7 @@ func (h *Handler) Logout(c *fiber.Ctx) error {
 }
 
 func (h *Handler) Me(c *fiber.Ctx) error {
-	cookie := c.Cookies("AcessToken")
+	cookie := c.Cookies(TokenName)
 
 	if cookie == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
