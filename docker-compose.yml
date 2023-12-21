@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  database:
+    container_name: pgDB
+    image: postgres:12.8
+    restart: always
+    environment:
+      - POSTGRES_USER=pg
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=auth
+    ports:
+      - 5432:5432
